@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="description" content="Android FRP Remove Files — direct download center. FRP bypass APKs, Google Account Manager, launchers, file managers and more." />
+<title>FRP File Directory — Download Center</title>
+<!--
+  ─────────────────────────────────────────────────────────────
+  100% STATIC — No backend required. Runs directly on GitHub Pages.
+
+  How to deploy on GitHub Pages:
+  1) GitHub Repo → Settings → Pages
+  2) Source: "Deploy from a branch"
+  3) Branch: main  |  Folder: / (root)  →  Save
+  ✓ Site live: https://<username>.github.io/FRP/
+  ─────────────────────────────────────────────────────────────
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #0b0f14;
+    --bg2: #10161d;
+    --card: #141c25;
+    --card-hover: #1a2430;
+    --border: #223041;
+    --text: #e8eef4;
+    --muted: #8fa3b8;
+    --accent: #3ddc84;
+    --accent-dark: #22b566;
+    --blue: #4da3ff;
+    --orange: #ffb454;
+    --purple: #b07cff;
+    --radius: 14px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background:
+      radial-gradient(1200px 500px at 80% -10%, rgba(61,220,132,.08), transparent 60%),
+      radial-gradient(900px 400px at 10% 0%, rgba(77,163,255,.07), transparent 60%),
+      var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+  .wrap { max-width: 1060px; margin: 0 auto; padding: 0 20px 70px; }
+
+  /* ── Header ─────────────────────────── */
+  header { padding: 46px 0 26px; }
+  .brand { display: flex; align-items: center; gap: 16px; }
+  .logo {
+    width: 58px; height: 58px; border-radius: 16px; flex: none;
+    background: linear-gradient(135deg, #3ddc84, #1fa45e);
+    display: grid; place-items: center;
+    box-shadow: 0 8px 30px rgba(61,220,132,.35);
+  }
+  .logo svg { width: 32px; height: 32px; }
+  h1 { font-size: clamp(22px, 4vw, 30px); font-weight: 800; letter-spacing: -.5px; }
+  h1 span { color: var(--accent); }
+  .tagline { color: var(--muted); font-size: 15px; margin-top: 3px; }
+  .badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(61,220,132,.12); color: var(--accent);
+    border: 1px solid rgba(61,220,132,.35);
+    padding: 3px 10px; border-radius: 99px; font-size: 12px; font-weight: 600; margin-left: 10px;
+    vertical-align: middle;
+  }
+  .badge .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); animation: pulse 1.6s infinite; }
+  @keyframes pulse { 50% { opacity: .35; } }
+
+  /* ── Stats ──────────────────────────── */
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; margin: 26px 0 20px; }
+  .stat {
+    background: linear-gradient(180deg, var(--card), var(--bg2));
+    border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 16px 18px;
+  }
+  .stat .num { font-size: 24px; font-weight: 800; color: var(--accent); }
+  .stat.blue .num { color: var(--blue); }
+  .stat.orange .num { color: var(--orange); }
+  .stat .lbl { color: var(--muted); font-size: 13px; margin-top: 2px; }
+
+  /* ── Toolbar ────────────────────────── */
+  .toolbar { display: flex; flex-direction: column; gap: 14px; margin-bottom: 26px; }
+  .search-row { display: flex; gap: 10px; }
+  .search {
+    flex: 1; display: flex; align-items: center; gap: 10px;
+    background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 0 16px; transition: border-color .2s;
+  }
+  .search:focus-within { border-color: var(--accent); }
+  .search svg { width: 18px; height: 18px; color: var(--muted); flex: none; }
+  .search input {
+    flex: 1; background: none; border: none; outline: none;
+    color: var(--text); font: inherit; font-size: 15px; padding: 14px 0;
+  }
+  .search input::placeholder { color: var(--muted); }
+  select {
+    background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+    color: var(--text); font: inherit; font-size: 14px; padding: 0 14px; outline: none; cursor: pointer;
+  }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip {
+    background: var(--card); border: 1px solid var(--border); color: var(--muted);
+    border-radius: 99px; padding: 7px 15px; font-size: 13.5px; font-weight: 500;
+    cursor: pointer; transition: all .18s; user-select: none;
+  }
+  .chip:hover { border-color: var(--accent); color: var(--text); }
+  .chip.active { background: var(--accent); border-color: var(--accent); color: #06281a; font-weight: 700; }
+
+  /* ── Sections & rows ────────────────── */
+  .sec-title {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 16px; font-weight: 700; margin: 30px 0 12px; color: var(--text);
+  }
+  .sec-title .cnt { font-size: 12px; color: var(--muted); background: var(--card); border: 1px solid var(--border); padding: 2px 9px; border-radius: 99px; }
+  .sec-title .bar { width: 4px; height: 18px; border-radius: 4px; background: var(--accent); }
+  .group { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; background: var(--bg2); }
+  .row {
+    display: flex; align-items: center; gap: 14px;
+    padding: 13px 16px; border-bottom: 1px solid var(--border);
+    transition: background .15s; animation: fadeUp .3s both;
+  }
+  .row:last-child { border-bottom: none; }
+  .row:hover { background: var(--card-hover); }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+  .fico {
+    width: 44px; height: 44px; border-radius: 11px; flex: none;
+    display: grid; place-items: center;
+  }
+  .fico svg { width: 23px; height: 23px; }
+  .fico.apk   { background: rgba(61,220,132,.13);  color: var(--accent); }
+  .fico.xapk  { background: rgba(255,180,84,.13);  color: var(--orange); }
+  .fico.doc   { background: rgba(77,163,255,.13);  color: var(--blue); }
+  .fico.other { background: rgba(176,124,255,.13); color: var(--purple); }
+
+  .finfo { flex: 1; min-width: 0; }
+  .fname {
+    font-weight: 600; font-size: 14.5px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .fmeta { display: flex; gap: 8px; align-items: center; margin-top: 3px; font-size: 12.5px; color: var(--muted); flex-wrap: wrap; }
+  .fmeta .sz { color: var(--accent); font-weight: 600; }
+  .fmeta .sep { opacity: .4; }
+  .fmeta .type { text-transform: uppercase; letter-spacing: .5px; font-size: 10.5px; font-weight: 700; background: var(--card); border: 1px solid var(--border); border-radius: 5px; padding: 1px 6px; }
+  .viewlink { color: var(--blue); text-decoration: none; font-size: 12.5px; }
+  .viewlink:hover { text-decoration: underline; }
+
+  .actions { display: flex; align-items: center; gap: 8px; flex: none; }
+
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px; flex: none;
+    background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+    color: #052b1a; font-weight: 700; font-size: 13.5px;
+    border: none; border-radius: 10px; padding: 10px 18px;
+    cursor: pointer; text-decoration: none;
+    transition: transform .15s, box-shadow .15s;
+    box-shadow: 0 4px 14px rgba(61,220,132,.25);
+  }
+  .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(61,220,132,.4); }
+  .btn:active { transform: none; }
+  .btn svg { width: 16px; height: 16px; }
+
+  /* GitHub raw mirror button */
+  .btn-gh {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 40px; height: 40px; border-radius: 10px; flex: none;
+    border: 1px solid var(--border); background: var(--card); color: var(--muted);
+    text-decoration: none; transition: all .15s;
+  }
+  .btn-gh:hover { color: var(--text); border-color: var(--blue); transform: translateY(-2px); }
+  .btn-gh svg { width: 18px; height: 18px; }
+
+  .empty { text-align: center; color: var(--muted); padding: 60px 0; display: none; }
+  .empty .big { font-size: 44px; margin-bottom: 10px; }
+
+  footer { margin-top: 50px; text-align: center; color: var(--muted); font-size: 13.5px; line-height: 2.1; }
+  footer a { color: var(--accent); text-decoration: none; font-weight: 600; }
+  footer a:hover { text-decoration: underline; }
+  .note {
+    margin-top: 40px; border: 1px dashed var(--border); border-radius: var(--radius);
+    background: var(--bg2); padding: 14px 18px; color: var(--muted); font-size: 13.5px; line-height: 1.9;
+  }
+  .note b { color: var(--orange); }
+
+  /* ── Toast ──────────────────────────── */
+  #toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
+    background: var(--card); border: 1px solid var(--accent); color: var(--text);
+    padding: 12px 22px; border-radius: 12px; font-size: 14px; opacity: 0;
+    transition: all .3s; pointer-events: none; box-shadow: 0 10px 40px rgba(0,0,0,.5);
+    max-width: 90vw; text-align: center;
+  }
+  #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+  #toast b { color: var(--accent); }
+
+  @media (max-width: 560px) {
+    header { padding-top: 30px; }
+    .row { gap: 10px; padding: 12px; }
+    .btn { padding: 10px 12px; font-size: 12.5px; }
+    .btn .btxt { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="brand">
+      <div class="logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#052b1a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" fill="rgba(5,43,26,.25)"/>
+          <path d="M9 12l2 2 4-4"/>
+        </svg>
+      </div>
+      <div>
+        <h1>FRP File <span>Directory</span><span class="badge"><span class="dot"></span>STATIC</span></h1>
+        <div class="tagline">Android FRP Remove Files — download any file directly ⬇</div>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><div class="num" id="stFiles">–</div><div class="lbl">Total Files</div></div>
+      <div class="stat blue"><div class="num" id="stSize">–</div><div class="lbl">Total Size</div></div>
+      <div class="stat orange"><div class="num" id="stCat">–</div><div class="lbl">Categories</div></div>
+    </div>
+
+    <div class="toolbar">
+      <div class="search-row">
+        <label class="search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+          <input id="q" type="text" placeholder="Search files… (e.g. account manager, youtube)" autocomplete="off" />
+        </label>
+        <select id="sort">
+          <option value="name">Sort by Name</option>
+          <option value="size">Sort by Size</option>
+        </select>
+      </div>
+      <div class="chips" id="chips"></div>
+    </div>
+  </header>
+
+  <main id="list"></main>
+  <div class="empty" id="empty"><div class="big">🔍</div>No files found — try a different search term</div>
+
+  <div class="note">
+    💡 <b>XAPK files</b> (YouTube v17.18.36) can't be installed like a normal APK —
+    install <b>Xapk_Installer_Pro_1.4.apk</b> first, then open the XAPK with it.
+  </div>
+
+  <footer>
+    ⚡ 100% Static — No Backend · GitHub Pages Ready · Large files download directly<br/>
+    <a href="https://Zerofrp.blogspot.com" target="_blank" rel="noopener">Zerofrp.blogspot.com</a>
+    · <a href="https://github.com/Sajedur0/FRP" target="_blank" rel="noopener">GitHub Repo</a>
+    · Android FRP Remove Files
+  </footer>
+</div>
+
+<div id="toast"></div>
+
+<script>
+'use strict';
+/* ════════════════════════════════════════════════════════════
+   All repo files are hardcoded here — no API/backend needed.
+   To add a new file, just add one line to the list below:
+   ["file_name", size_in_bytes]
+   ════════════════════════════════════════════════════════════ */
+const FILES = [
+  ['Apex_Launcher.apk',               23519658],
+  ['BypassFRP-1.0.apk',                1231829],
+  ['Development_Settings.apk',           47737],
+  ['ES_File_Explorer.apk',            11724728],
+  ['File_Manager_2.5.9.apk',           6263002],
+  ['Google_Account_Manager_10.apk',    8300263],
+  ['Google_Account_Manager_4.0.apk',   4051474],
+  ['Google_Account_Manager_4.4.4.apk', 5716290],
+  ['Google_Account_Manager_5.0.1.apk', 7591241],
+  ['Google_Account_Manager_5.1.apk',   4991563],
+  ['Google_Account_Manager_6.0.1.apk', 8300263],
+  ['Google_Account_Manager_7.0.apk',   8335873],
+  ['Google_Account_Manager_7.1.1.apk', 6551358],
+  ['Google_Account_Manager_7.1.2.apk', 6552461],
+  ['Google_Account_Manager_8.0.apk',   8412302],
+  ['Google_Account_Manager_8.1.apk',   8300263],
+  ['Google_Account_Manager_9.0.apk',   6552461],
+  ['Google_Play_Store_For_Android_TV.apk', 16959786],
+  ['Google_Setting.apk',              29857043],
+  ['Phone_Factory_Reset_1.3.apk',      1574057],
+  ['QuickShortcutMaker.apk',           2115037],
+  ['README.md',                              69],
+  ['Setting.apk',                        47737],
+  ['Simple_Control_2.1.2_Virgo.apk',   3650738],
+  ['Smart_Switch_Mobile.apk',         31110461],
+  ['Technocare.apk',                  29854986],
+  ['Test_DPC.apk',                     2861928],
+  ['Toffee_For_Android_TV.apk',       17337948],
+  ['Xapk_Installer_Pro_1.4.apk',       2945761],
+  ['YouTube_2.17.006.apk',            21733988],
+  ['YouTube_v17.18.36.xapk',          49087469],
+].map(([n, s]) => ({ n, s }));
+
+/* GitHub direct (raw) links — work from anywhere */
+const REPO_RAW  = 'https://github.com/Sajedur0/FRP/raw/main/';
+const REPO_BLOB = 'https://github.com/Sajedur0/FRP/blob/main/';
+
+/* ── Category mapping ─────────────────────────────── */
+const CATS = [
+  { id: 'gam',     label: 'Google Account Manager',  color: '#3ddc84', test: n => /^Google_Account_Manager/i.test(n) },
+  { id: 'bypass',  label: 'FRP Bypass Tools',        color: '#4da3ff', test: n => /^(BypassFRP|QuickShortcutMaker|Technocare|Google_Setting|Development_Settings|Setting\.apk|Test_DPC|Phone_Factory_Reset|Xapk_Installer)/i.test(n) },
+  { id: 'tools',   label: 'Launchers & File Managers', color: '#ffb454', test: n => /^(Apex_Launcher|ES_File_Explorer|File_Manager|Simple_Control)/i.test(n) },
+  { id: 'media',   label: 'Media & TV Apps',         color: '#b07cff', test: n => /^(Google_Play_Store|Toffee|Smart_Switch|YouTube)/i.test(n) },
+  { id: 'docs',    label: 'Documents',               color: '#8fa3b8', test: n => /\.(md|txt)$/i.test(n) },
+];
+const catOf = n => CATS.find(c => c.test(n)) || CATS[CATS.length - 1];
+
+const icon = t => t === 'apk'
+  ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5 10v7a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-7z"/><path d="M3 10h18"/><path d="M8 21v-3M16 21v-3"/><path d="m7 5-1.5-2M17 5l1.5-2"/><circle cx="9.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="14.5" cy="7.5" r=".5" fill="currentColor"/></svg>`
+  : t === 'xapk'
+  ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8-9-5-9 5v8l9 5 9-5z"/><path d="M3 8l9 5 9-5M12 13v9"/></svg>`
+  : t === 'md' || t === 'txt'
+  ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 13h6M9 17h6"/></svg>`
+  : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M21 8-9-5-9 5v8l9 5 9-5z"/><path d="M3 8l9 5 9-5"/></svg>`;
+
+const GH_ICON = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.11.79-.25.79-.55 0-.27-.01-1.17-.02-2.12-3.2.7-3.88-1.36-3.88-1.36-.52-1.33-1.28-1.68-1.28-1.68-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.19 1.76 1.19 1.03 1.75 2.69 1.25 3.35.95.1-.75.4-1.25.72-1.54-2.55-.29-5.24-1.28-5.24-5.68 0-1.26.45-2.28 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11.1 11.1 0 0 1 5.79 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.12 3.05.74.81 1.19 1.83 1.19 3.09 0 4.41-2.7 5.38-5.26 5.66.41.36.78 1.05.78 2.13 0 1.54-.01 2.78-.01 3.16 0 .3.21.67.8.55A11.51 11.51 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5z"/></svg>`;
+
+const DL_ICON = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M5 21h14"/></svg>`;
+
+const humanSize = b => {
+  const u = ['B', 'KB', 'MB', 'GB']; let i = 0, n = b;
+  while (n >= 1024 && i < u.length - 1) { n /= 1024; i++; }
+  return (i === 0 ? n : n.toFixed(2)) + ' ' + u[i];
+};
+const pretty = n => n.replace(/\.(apk|xapk|md)$/i, '').replace(/_+/g, ' ').trim();
+const esc = s => s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+let activeCat = 'all';
+
+/* ── Init ─────────────────────────────────────────── */
+(function init() {
+  document.getElementById('stFiles').textContent = FILES.length;
+  document.getElementById('stSize').textContent = humanSize(FILES.reduce((s, f) => s + f.s, 0));
+  document.getElementById('stCat').textContent = new Set(FILES.map(f => catOf(f.n).id)).size;
+
+  const chips = document.getElementById('chips');
+  chips.innerHTML = `<span class="chip active" data-cat="all">All (${FILES.length})</span>` +
+    CATS.map(c => {
+      const n = FILES.filter(f => c.test(f.n)).length;
+      return n ? `<span class="chip" data-cat="${c.id}">${c.label} (${n})</span>` : '';
+    }).join('');
+  chips.addEventListener('click', e => {
+    const chip = e.target.closest('.chip'); if (!chip) return;
+    chips.querySelectorAll('.chip').forEach(x => x.classList.remove('active'));
+    chip.classList.add('active');
+    activeCat = chip.dataset.cat;
+    render();
+  });
+
+  document.getElementById('q').addEventListener('input', render);
+  document.getElementById('sort').addEventListener('change', render);
+  render();
+})();
+
+function filtered() {
+  const q = document.getElementById('q').value.trim().toLowerCase();
+  const sort = document.getElementById('sort').value;
+  const out = FILES.filter(f =>
+    (activeCat === 'all' || catOf(f.n).id === activeCat) &&
+    (!q || f.n.toLowerCase().includes(q) || pretty(f.n).toLowerCase().includes(q))
+  );
+  out.sort((a, b) => sort === 'size' ? b.s - a.s : a.n.localeCompare(b.n, undefined, { numeric: true }));
+  return out;
+}
+
+function render() {
+  const files = filtered();
+  const list = document.getElementById('list');
+  document.getElementById('empty').style.display = files.length ? 'none' : 'block';
+
+  const byCat = new Map();
+  files.forEach(f => {
+    const c = catOf(f.n);
+    if (!byCat.has(c.id)) byCat.set(c.id, { cat: c, items: [] });
+    byCat.get(c.id).items.push(f);
+  });
+
+  let i = 0;
+  list.innerHTML = [...byCat.values()].map(({ cat, items }) => `
+    <div class="sec-title"><span class="bar" style="background:${cat.color}"></span>${cat.label}<span class="cnt">${items.length}</span></div>
+    <div class="group">${items.map(f => {
+      const isDoc = /\.(md|txt)$/i.test(f.n);
+      const href  = encodeURI(f.n);                       /* relative → works on GitHub Pages */
+      const raw   = REPO_RAW + encodeURI(f.n);            /* GitHub direct download link */
+      return `
+      <div class="row" style="animation-delay:${Math.min(i++ * 30, 400)}ms">
+        <div class="fico ${f.n.endsWith('.apk') ? 'apk' : f.n.endsWith('.xapk') ? 'xapk' : isDoc ? 'doc' : 'other'}">${icon(f.n.split('.').pop().toLowerCase())}</div>
+        <div class="finfo">
+          <div class="fname" title="${esc(f.n)}">${esc(pretty(f.n))}</div>
+          <div class="fmeta">
+            <span class="sz">${humanSize(f.s)}</span><span class="sep">•</span>
+            <span class="type">${esc(f.n.split('.').pop().toLowerCase())}</span>
+            ${isDoc ? `<span class="sep">•</span><a class="viewlink" href="${REPO_BLOB + encodeURI(f.n)}" target="_blank" rel="noopener">View ↗</a>` : ''}
+          </div>
+        </div>
+        <div class="actions">
+          <a class="btn-gh" href="${raw}" target="_blank" rel="noopener" title="GitHub direct link: ${esc(f.n)}" aria-label="GitHub raw download">${GH_ICON}</a>
+          <a class="btn" href="${href}" download="${esc(f.n)}" onclick="toast('${esc(f.n)}')" title="Download: ${esc(f.n)}">
+            ${DL_ICON}<span class="btxt">Download</span>
+          </a>
+        </div>
+      </div>`;
+    }).join('')}</div>
+  `).join('');
+}
+
+let toastTimer;
+function toast(name) {
+  const t = document.getElementById('toast');
+  t.innerHTML = `⬇ Download started: <b>${esc(name)}</b>`;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2600);
+}
+</script>
+</body>
+</html>
