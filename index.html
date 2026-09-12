@@ -56,14 +56,6 @@
   /* ── Header ─────────────────────────── */
   header { padding: 48px 0 24px; }
   .brand { display: flex; align-items: center; gap: 16px; }
-  .logo {
-    width: 56px; height: 56px; border-radius: 16px; flex: none;
-    background: linear-gradient(135deg, #3ddc84, #1fa45e);
-    display: grid; place-items: center;
-    box-shadow: 0 8px 30px rgba(61,220,132,.35);
-    border: 1px solid rgba(255,255,255,.14);
-  }
-  .logo svg { width: 30px; height: 30px; display: block; }
   h1 { font-size: clamp(22px, 4vw, 30px); font-weight: 800; letter-spacing: -.6px; line-height: 1.15; }
   h1 span { color: var(--accent); }
   .tagline { color: var(--muted); font-size: 14.5px; margin-top: 5px; line-height: 1.5; }
@@ -78,7 +70,6 @@
     min-height: 52px;
   }
   .search:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(61,220,132,.15); }
-  .search svg { width: 18px; height: 18px; color: var(--muted); flex: none; display: block; }
   .search input {
     flex: 1; background: none; border: none; outline: none; width: 100%;
     color: var(--text); font: inherit; font-size: 15px; padding: 14px 0;
@@ -87,6 +78,21 @@
 
   /* ── File list ──────────────────────── */
   #list { min-height: 280px; flex: 1; }
+
+  /* ── Open Apps section ──────────────── */
+  #apps-section { margin-bottom: 26px; }
+  .openbtn {
+    flex: none; text-decoration: none;
+    font-size: 13px; font-weight: 700; letter-spacing: .2px;
+    color: #052b1a; background: var(--accent);
+    border-radius: 10px; padding: 9px 16px;
+    transition: filter .15s, transform .15s;
+    white-space: nowrap;
+  }
+  .openbtn:hover { filter: brightness(1.1); }
+  .openbtn:active { transform: scale(.96); }
+  .openbtn:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+  .row .pkg { color: var(--muted); font-weight: 400; font-size: 11.5px; }
   .group {
     border: 1px solid var(--border); border-radius: var(--radius);
     overflow: hidden; background: var(--bg2);
@@ -106,11 +112,8 @@
     display: grid; place-items: center;
     border: 1px solid rgba(255,255,255,.06);
   }
-  .fico svg { width: 22px; height: 22px; display: block; }
-  .fico.apk   { background: rgba(61,220,132,.13);  color: var(--accent); }
-  .fico.xapk  { background: rgba(255,180,84,.13);  color: var(--orange); }
-  .fico.doc   { background: rgba(77,163,255,.13);  color: var(--blue); }
-  .fico.other { background: rgba(176,124,255,.13); color: var(--purple); }
+  .fico.app { padding: 0; overflow: hidden; background: #fff; }
+  .fico.app img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
   .finfo { flex: 1; min-width: 0; }
   .fname {
@@ -158,14 +161,13 @@
 
   @media (max-width: 560px) {
     header { padding: 32px 0 20px; }
-    .logo { width: 48px; height: 48px; border-radius: 14px; }
-    .logo svg { width: 26px; height: 26px; }
     .tagline { font-size: 13.5px; }
     .search { min-height: 50px; }
     .search input { font-size: 16px; }
     .row { gap: 12px; padding: 12px 14px; }
     .fico { width: 40px; height: 40px; }
     .fname { font-size: 14px; }
+    .openbtn { padding: 8px 13px; font-size: 12.5px; }
   }
   @media (prefers-reduced-motion: reduce) {
     * { animation: none !important; transition: none !important; }
@@ -178,12 +180,6 @@
 
   <header>
     <div class="brand">
-      <div class="logo">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#052b1a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" fill="rgba(5,43,26,.25)"/>
-          <path d="M9 12l2 2 4-4"/>
-        </svg>
-      </div>
       <div>
         <h1>FRP File <span>Directory</span></h1>
         <div class="tagline">Android FRP Remove Files — download any file directly ⬇</div>
@@ -193,12 +189,15 @@
     <div class="toolbar">
       <div class="search-row">
         <label class="search">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
           <input id="q" type="text" placeholder="Search files by name…" autocomplete="off" />
         </label>
       </div>
     </div>
   </header>
+
+  <section id="apps-section">
+    <div id="apps"></div>
+  </section>
 
   <main id="list"></main>
   <div class="empty" id="empty"><div class="big">🔍</div>No files found — try a different search term</div>
@@ -215,51 +214,73 @@
 /* ════════════════════════════════════════════════════════════
    All repo files are hardcoded here — no API/backend needed.
    To add a new file, just add one line to the list below:
-   ["file_name", size_in_bytes]
+   ["file_name", size_in_bytes, icon_path]
    ════════════════════════════════════════════════════════════ */
 const FILES = [
-  ['Apex_Launcher.apk',               23519658],
-  ['BypassFRP-1.0.apk',                1231829],
-  ['Development_Settings.apk',           47737],
-  ['ES_File_Explorer.apk',            11724728],
-  ['File_Manager_2.5.9.apk',           6263002],
-  ['Google_Account_Manager_10.apk',    8300263],
-  ['Google_Account_Manager_4.0.apk',   4051474],
-  ['Google_Account_Manager_4.4.4.apk', 5716290],
-  ['Google_Account_Manager_5.0.1.apk', 7591241],
-  ['Google_Account_Manager_5.1.apk',   4991563],
-  ['Google_Account_Manager_6.0.1.apk', 8300263],
-  ['Google_Account_Manager_7.0.apk',   8335873],
-  ['Google_Account_Manager_7.1.1.apk', 6551358],
-  ['Google_Account_Manager_7.1.2.apk', 6552461],
-  ['Google_Account_Manager_8.0.apk',   8412302],
-  ['Google_Account_Manager_8.1.apk',   8300263],
-  ['Google_Account_Manager_9.0.apk',   6552461],
-  ['Google_Play_Store_For_Android_TV.apk', 16959786],
-  ['Google_Setting.apk',              29857043],
-  ['Phone_Factory_Reset_1.3.apk',      1574057],
-  ['QuickShortcutMaker.apk',           2115037],
-  ['Setting.apk',                        47737],
-  ['Simple_Control_2.1.2_Virgo.apk',   3650738],
-  ['Smart_Switch_Mobile.apk',         31110461],
-  ['Technocare.apk',                  29854986],
-  ['Test_DPC.apk',                     2861928],
-  ['Toffee_For_Android_TV.apk',       17337948],
-  ['Xapk_Installer_Pro_1.4.apk',       2945761],
-  ['YouTube_2.17.006.apk',            21733988],
-  ['YouTube_v17.18.36.xapk',          49087469],
-].map(([n, s]) => ({ n, s }));
+  ['Apex_Launcher.apk',               23519658, 'assets/icons/apk/apex-launcher.png'],
+  ['BypassFRP-1.0.apk',                1231829, 'assets/icons/apk/bypassfrp.jpg'],
+  ['Development_Settings.apk',           47737, 'assets/icons/apk/development-settings.png'],
+  ['ES_File_Explorer.apk',            11724728, 'assets/icons/apk/es-file-explorer.png'],
+  ['File_Manager_2.5.9.apk',           6263002, 'assets/icons/apk/file-manager.png'],
+  ['Google_Account_Manager_10.apk',    8300263, 'assets/icons/apk/google-account.png'],
+  ['Google_Account_Manager_4.0.apk',   4051474, 'assets/icons/apk/google-account.png'],
+  ['Google_Account_Manager_4.4.4.apk', 5716290, 'assets/icons/apk/google-account.png'],
+  ['Google_Account_Manager_5.0.1.apk', 7591241, 'assets/icons/apk/google-account.png'],
+  ['Google_Account_Manager_5.1.apk',   4991563, 'assets/icons/apk/google-account.png'],
+  ['Google_Account_Manager_6.0.1.apk', 8300263, 'assets/icons/apk/google-account.png'],
+  ['Google_Account_Manager_7.0.apk',   8335873, 'assets/icons/apk/google-account.png'],
+  ['Google_Account_Manager_7.1.1.apk', 6551358, 'assets/icons/apk/google-account.png'],
+  ['Google_Account_Manager_7.1.2.apk', 6552461, 'assets/icons/apk/google-account.png'],
+  ['Google_Account_Manager_8.0.apk',   8412302, 'assets/icons/apk/google-account.png'],
+  ['Google_Account_Manager_8.1.apk',   8300263, 'assets/icons/apk/google-account.png'],
+  ['Google_Account_Manager_9.0.apk',   6552461, 'assets/icons/apk/google-account.png'],
+  ['Google_Play_Store_For_Android_TV.apk', 16959786, 'assets/icons/apk/play-store-tv.png'],
+  ['Google_Setting.apk',              29857043, 'assets/icons/apk/google-setting.png'],
+  ['Phone_Factory_Reset_1.3.apk',      1574057, 'assets/icons/apk/factory-reset.png'],
+  ['QuickShortcutMaker.apk',           2115037, 'assets/icons/apk/quickshortcutmaker.png'],
+  ['Setting.apk',                        47737, 'assets/icons/apk/setting.png'],
+  ['Simple_Control_2.1.2_Virgo.apk',   3650738, 'assets/icons/apk/simple-control.png'],
+  ['Smart_Switch_Mobile.apk',         31110461, 'assets/icons/apk/smart-switch.png'],
+  ['Technocare.apk',                  29854986, 'assets/icons/apk/technocare.webp'],
+  ['Test_DPC.apk',                     2861928, 'assets/icons/apk/test-dpc.png'],
+  ['Toffee_For_Android_TV.apk',       17337948, 'assets/icons/apk/toffee-tv.png'],
+  ['Xapk_Installer_Pro_1.4.apk',       2945761, 'assets/icons/apk/xapk-installer.png'],
+  ['YouTube_2.17.006.apk',            21733988, 'assets/icons/apk/youtube.png'],
+  ['YouTube_v17.18.36.xapk',          49087469, 'assets/icons/apk/youtube.png'],
+].map(([n, s, icon]) => ({ n, s, icon }));
+
+/* ════════════════════════════════════════════════════════════
+   Direct "Open App" links — same idea as frpbypass.romstage.com
+   Tap on Android → opens the system app directly via intent://
+   Icons: local copies of romstage icons in assets/icons/
+   [name, intent_url, package_hint, icon_path]
+   ════════════════════════════════════════════════════════════ */
+const OPEN_APPS = [
+  ['Galaxy Store',            'intent://com.sec.android.app.samsungapps/#Intent;scheme=android-app;end',                 'com.sec.android.app.samsungapps',          'assets/icons/apps/galaxy-store.jpg'],
+  ['Google Search',           'intent://com.google.android.googlequicksearchbox/#Intent;scheme=android-app;end',         'com.google.android.googlequicksearchbox',  'assets/icons/apps/google-search.png'],
+  ['Settings',                'intent://com.android.settings/#Intent;scheme=android-app;end',                            'com.android.settings',                     'assets/icons/apps/settings.png'],
+  ['Set Screen Lock',         'intent://com.google.android.gms/#Intent;scheme=promote_smartlock_scheme;end',            'com.google.android.gms',                   'assets/icons/apps/screen-lock.png'],
+  ['EasyShare',               'intent://com.vivo.easyshare/#Intent;scheme=android-app;end',                              'com.vivo.easyshare',                       'assets/icons/apps/easyshare.png'],
+  ['Moto',                    'intent://com.motorola.moto/#Intent;scheme=android-app;end',                               'com.motorola.moto',                        'assets/icons/apps/moto.png'],
+  ['Motorola Launcher',       'intent://com.motorola.launcher3/#Intent;scheme=android-app;end',                         'com.motorola.launcher3',                   'assets/icons/apps/motorola-launcher.jpg'],
+  ['Moto Secure',             'intent://com.motorola.securityhub/#Intent;scheme=android-app;end',                       'com.motorola.securityhub',                 'assets/icons/apps/moto-secure.png'],
+  ['Google Assistant',        'intent://com.google.android.apps.googleassistant/#Intent;scheme=android-app;end',        'com.google.android.apps.googleassistant',  'assets/icons/apps/google-assistant.png'],
+  ['Samsung My Files',        'intent://com.sec.android.app.myfiles/#Intent;scheme=android-app;end',                    'com.sec.android.app.myfiles',              'assets/icons/apps/samsung-my-files.png'],
+  ['Mi File Manager',         'intent://com.mi.android.globalFileexplorer/#Intent;scheme=android-app;end',              'com.mi.android.globalFileexplorer',        'assets/icons/apps/mi-file-manager.png'],
+  ['YouTube',                 'intent://com.google.android.youtube/#Intent;scheme=android-app;end',                     'com.google.android.youtube',               'assets/icons/apps/youtube.png'],
+  ['Activity Manager',        'intent://com.activitymanager/#Intent;scheme=android-app;end',                             'com.activitymanager',                      'assets/icons/apps/activity-manager.png'],
+  ['Samsung Calculator',      'intent://com.sec.android.app.popupcalculator/#Intent;scheme=android-app;end',             'com.sec.android.app.popupcalculator',      'assets/icons/apps/samsung-calculator.png'],
+  ['Google Maps',             'intent://com.google.android.apps.maps/#Intent;scheme=android-app;end',                   'com.google.android.apps.maps',             'assets/icons/apps/google-maps.jpg'],
+  ['Add Google Account',      'intent://com.google.android.gsf.login.LoginActivity/#Intent;scheme=android-app;end',     'login / gsf',                              'assets/icons/apps/add-google-account.png'],
+  ['Samsung Home Launcher',   'intent://com.sec.android.app.launcher/#Intent;scheme=android-app;end',                   'com.sec.android.app.launcher',             'assets/icons/apps/home-launcher.png'],
+  ['Alliance Shield',         'intent://com.rrivenllc.shieldx/#Intent;scheme=android-app;end',                          'com.rrivenllc.shieldx',                    'assets/icons/apps/alliance-shield.png'],
+  ['Gmail',                   'intent://com.google.android.gm/#Intent;scheme=android-app;end',                          'com.google.android.gm',                    'assets/icons/apps/gmail.png'],
+  ['Dial Pad',                'tel:123456789',                                                                          'tel',                                      'assets/icons/apps/dial-pad.png'],
+  ['*#0*# Test Mode',         'tel:*%230*%23',                                                                           'adb / tecno infinix',                      'assets/icons/apps/test-mode.png'],
+].map(([n, url, pkg, icon]) => ({ n, url, pkg, icon }));
 
 /* GitHub blob link for docs */
 const REPO_BLOB = 'https://github.com/Sajedur0/FRP/blob/main/';
-
-const icon = t => t === 'apk'
-  ? `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.6 9.48l1.84-3.18c.16-.31.04-.69-.26-.85-.29-.15-.65-.06-.83.22l-1.88 3.24c-2.86-1.21-6.08-1.21-8.94 0L5.65 5.67c-.19-.29-.58-.38-.87-.2-.28.18-.37.54-.22.83L6.4 9.48A10.81 10.81 0 0 0 1 18h22a10.81 10.81 0 0 0-5.4-8.52zM7 15.25a1.25 1.25 0 1 1 2.5 0 1.25 1.25 0 0 1-2.5 0zm10 0a1.25 1.25 0 1 1 2.5 0 1.25 1.25 0 0 1-2.5 0z"/></svg>`
-  : t === 'xapk'
-  ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8-9-5-9 5v8l9 5 9-5z"/><path d="M3 8l9 5 9-5M12 13v9"/></svg>`
-  : t === 'md' || t === 'txt'
-  ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 13h6M9 17h6"/></svg>`
-  : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M21 8-9-5-9 5v8l9 5 9-5z"/><path d="M3 8l9 5 9-5"/></svg>`;
 
 const humanSize = b => {
   const u = ['B', 'KB', 'MB', 'GB']; let i = 0, n = b;
@@ -284,10 +305,37 @@ function filtered() {
   return out;
 }
 
+function filteredApps() {
+  const q = document.getElementById('q').value.trim().toLowerCase();
+  if (!q) return OPEN_APPS;
+  return OPEN_APPS.filter(a =>
+    a.n.toLowerCase().includes(q) || (a.pkg && a.pkg.toLowerCase().includes(q))
+  );
+}
+
 function render() {
   const files = filtered();
+  const apps = filteredApps();
   const list = document.getElementById('list');
-  document.getElementById('empty').style.display = files.length ? 'none' : 'block';
+  const appsBox = document.getElementById('apps');
+  const appsSection = document.getElementById('apps-section');
+  document.getElementById('empty').style.display = (files.length || apps.length) ? 'none' : 'block';
+
+  /* ── Top group: Direct Open Apps (romstage style) ── */
+  appsSection.style.display = apps.length ? 'block' : 'none';
+  let j = 0;
+  appsBox.innerHTML = `<div class="group">${apps.map(a => `
+      <div class="row" style="animation-delay:${Math.min(j++ * 30, 300)}ms">
+        <div class="fico app"><img src="${esc(a.icon)}" alt="${esc(a.n)}" loading="lazy" onerror="this.remove()"></div>
+        <div class="finfo">
+          <a class="fname" title="${esc(a.n)}" href="${esc(a.url)}">${esc(a.n)}</a>
+          <div class="fmeta">
+            <span class="type">open app</span><span class="sep">•</span>
+            <span class="pkg">${esc(a.pkg)}</span>
+          </div>
+        </div>
+        <a class="openbtn" href="${esc(a.url)}">Open</a>
+      </div>`).join('')}</div>`;
 
   let i = 0;
   list.innerHTML = `<div class="group">${files.map(f => {
@@ -295,7 +343,7 @@ function render() {
       const href  = encodeURI(f.n);                       /* relative → works on GitHub Pages */
       return `
       <div class="row" style="animation-delay:${Math.min(i++ * 30, 300)}ms">
-        <div class="fico ${f.n.endsWith('.apk') ? 'apk' : f.n.endsWith('.xapk') ? 'xapk' : isDoc ? 'doc' : 'other'}">${icon(f.n.split('.').pop().toLowerCase())}</div>
+        <div class="fico app"><img src="${esc(f.icon)}" alt="${esc(pretty(f.n))}" loading="lazy" onerror="this.remove()"></div>
         <div class="finfo">
           <a class="fname" title="${esc(f.n)}" href="${href}" download="${esc(f.n)}" onclick="toast('${esc(f.n)}')">${esc(pretty(f.n))}</a>
           <div class="fmeta">
